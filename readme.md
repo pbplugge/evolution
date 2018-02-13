@@ -13,3 +13,16 @@ My goal is to add to this project frequently. Hopefully some of you will join me
 
 # This is just a first commit to get started. I will add & update new stuff soon.
 
+### How does it work?
+
+Clone the repository.
+Go to the directory and execute build.sh
+It should compile without errors or warnings.
+Put the created _evolution.so in the notebooks directory.
+Start python notebook in the notebooks directory.
+
+You can also use C++ instead of python.
+
+Either way you will need to create some C++ code simmilar to the code of the examples.
+
+I will go in to more detail later.
