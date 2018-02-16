@@ -1,14 +1,13 @@
+/** @file evolutionary_function.h
+ *  @brief could be used as part of an evolutionary program as a component.
+ *
+ * Not implemented.!
+ */
 #ifndef EVOLUTIONARY_FUNCTION_H
 #define EVOLUTIONARY_FUNCTION_H
 
 namespace evolution {
 
-   /**
-    * Not implemented.!
-    *
-    * A evolutionary program can consist out of evolutionary functions.
-    * Each can evolve to have a specific task.
-    */
    class EvolutionaryFunction {
 
    };

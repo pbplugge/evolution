@@ -1,3 +1,13 @@
+/** @file individual.h
+ *  @brief A single individual.
+ *
+ *  The individual contains the evolutionary program.
+ *  Its fitness should only be re-calculated when marked dirty to safe processor time.
+ *  The age is calculated depending on the evolutionary algorithm used.
+ *  Its implemented in the Thread class.
+ *
+ *  TODO: Perhaps more separate evolvable programs possible per individual.
+ */
 #ifndef INDIVIDUAL_H
 #define INDIVIDUAL_H
 
@@ -38,20 +48,20 @@ namespace evolution {
       void SetAge(double);
 
    private:
+      // The definition of the individual.
       EvolutionaryProgram m_evolutionary_program;
 
       Fitness m_fitness;
 
+      // Just references to the originals.
       ComponentManager *m_component_manager;
       ComponentLibrary *m_component_library;
 
+      // Individuals can die from old age.
       double m_age;
 
-      // Dirty flag if modified but fitness not calculated.
+      // Dirty flag if changed but fitness not calculated.
       bool m_dirty;
-
-      // TODO: Besides evolutionary programs perhaps also give it a genome to evolve.
-      // TODO: Perhaps more programs possiible per individual.
    };
 }
 

@@ -1,3 +1,8 @@
+/** @file hall_of_fame.h
+ *  @brief Keeps track of the best individuals that ever existed during simulation.
+ *
+ *  TODO: Does not yet check on doubles.
+ */
 #ifndef HALL_OF_FAME_H
 #define HALL_OF_FAME_H
 
@@ -7,9 +12,6 @@ namespace evolution {
 
    #define HALL_OF_FAME_INDIVIDUALS 10
 
-   /**
-    * To keep track of the best individuals during evolution.
-    */
    class HallOfFame {
    public:
       HallOfFame(ComponentManager *t_component_manager,ComponentLibrary *t_component_library);

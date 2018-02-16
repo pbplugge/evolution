@@ -1,3 +1,14 @@
+/** @file component.h
+ *  @brief Components in an evolutionary program
+ *
+ *  I called it components. They could be called nodes.
+ *  But the component has input nodes and output nodes so it would get confusing if a node has input nodes and output nodes.
+ *
+ *  The component does not know anything about its implementation/function.
+ *  It purpose is to wire up with other components trough its nodes so they can communicate values.
+ *
+ *  The functionality of a component is implemented as ComponentType which should be user defined.
+ */
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
@@ -10,10 +21,6 @@
 namespace evolution {
    class Thread;
 
-   /**
-    * Component has input and output nodes.
-    * The functionality is implemented as ComponentType.
-    */
    class Component {
    public:
       Component();
@@ -31,6 +38,7 @@ namespace evolution {
       ComponentType *GetComponentType(void);
 
       double GetParameterValue(int t_parameter);
+      void SetParameterValue(int t_parameter,double t_value);
       void RandomizeParameters(void);
       void RandomizeParameter(int t_parameter);
       void DisconnectFrom(Component *t_component);

@@ -1,3 +1,10 @@
+/** @file component_inputnode.h
+ *  @brief An input node can be connected to an output node and read its value.
+ *
+ *  It is a property of a component.
+ *  It is connected by the evolutionary program.
+ *  It is read by the component type.
+ */
 #ifndef COMPONENT_INPUTNODE_H
 #define COMPONENT_INPUTNODE_H
 
@@ -8,9 +15,6 @@ namespace evolution {
    class ComponentOutputNode;
    class EvolutionaryProgram;
 
-   /**
-    * Inputs can listen to a state or be connected to an output node.
-    */
    class ComponentInputNode {
    public:
       ComponentInputNode();
@@ -23,7 +27,7 @@ namespace evolution {
       std::string GetName(void);
       void CopyFrom(ComponentInputNode *org, EvolutionaryProgram *e);
       std::string ToJson(void);
-      void FromJson(nlohmann::json json, EvolutionaryProgram *e);
+      //void FromJson(nlohmann::json json, EvolutionaryProgram *e);
       void SetComponent(Component *c);
       Component *GetComponent(void);
       void SetInputIndex(int i);

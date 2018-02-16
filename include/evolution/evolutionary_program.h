@@ -1,3 +1,9 @@
+/** @file evolutionary_program.h
+ *  @brief A single evolutionary program inside an individual.
+ *
+ *  It is responsible for connecting a random selection of (user defined) components from the component library and its mutations and cross-overs.
+ *  It does not know anything about what it is used for, its just the wiring and execution.
+ */
 #ifndef EVOLUTIONARY_PROGRAM_H
 #define EVOLUTIONARY_PROGRAM_H
 
@@ -9,13 +15,6 @@ namespace evolution {
    class Component;
    class ComponentManager;
 
-
-   /**
-    * This class is devoted to:
-    * - Create new genetic programs.
-    * - Mutate them.
-    * - Cross over them.
-    */
    class EvolutionaryProgram {
    public:
       EvolutionaryProgram();
@@ -32,6 +31,8 @@ namespace evolution {
 
       Component *GetComponentOfType(ComponentType *t_component_type);
       int GetComponentCount(void);
+      Component *GetComponentAt(int index);
+
 
       void Execute(void);
 
@@ -77,7 +78,6 @@ namespace evolution {
       int GetOutputNodeCount(void);
       ComponentInputNode *GetInputNode(int n);
       ComponentOutputNode *GetOutputNode(int n);
-      Component *GetComponentAt(int index);
       int GetComponentIndex(Component *t_component);
       void FlipComponentPositions(int t_pos1, int t_pos2);
       Component *GetRandomComponentOfType(ComponentType *t_type);

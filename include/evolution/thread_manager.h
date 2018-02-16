@@ -1,12 +1,14 @@
+/** @file thread_manager.h
+ *  @brief The manager starts/accesses the individual threads.
+ *
+ *  It is used as the central access point.
+ */
 #ifndef MANAGER_H
 #define MANAGER_H
 
 #define MAX_THREADS 10
 
 
-/**
- * The manager starts the individual threads.
- */
 namespace evolution {
    class ThreadManager {
    public:

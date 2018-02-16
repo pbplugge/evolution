@@ -1,3 +1,18 @@
+/** @file component_type.h
+ *  @brief The definition of a components functionality.
+ *
+ *  Its a parent class for all implementations of a component you may have.
+ *  It has virtual function Execute() which is called when a component executes.
+ *
+ *  The component type contains:
+ *  - How many inputs and outputs the component has.
+ *  - A definition on what type each input and output is.
+ *  - The minimum and maximum number of these components should exist.
+ *  - The name of the component type.
+ *  - The number of parameters inside a component that can evolve.
+ *
+ *  TODO: Getters and setters should be implemented.
+ */
 #ifndef COMPONENT_TYPE_H
 #define COMPONENT_TYPE_H
 
@@ -35,11 +50,6 @@ namespace evolution {
       int m_req_number_of_components;
 
       int m_number_of_parameters;
-
-      bool m_is_terminal;
-      bool m_is_primitive;
-
-      // TODO: Getters and setters.
    };
 
 }

@@ -1,3 +1,11 @@
+/** @file config.h
+ *  @brief Configuration of the evolution.
+ *
+ *  Basically getters and setters of hyper parameters.
+ *  Its an abstraction so we don't have all this stuff in the Thread class.
+ *
+ *  TODO: make speed of aging & target age configurable.
+ */
 #ifndef EVOLUTION_CONFIG_H
 #define EVOLUTION_CONFIG_H
 
@@ -5,9 +13,6 @@
 namespace evolution {
    class Individual;
 
-   /**
-    * Main configuration of an evolutioin thread.
-    */
    class Config {
    public:
       Config();

@@ -3,7 +3,10 @@
 
 using namespace evolution;
 
-
+/**
+ * A global.
+ * Its the only way to run as a shared library and remember between calls.
+ */
 ThreadManager *thread_manager;
 
 
@@ -11,13 +14,15 @@ ThreadManager *thread_manager;
  * Creates the manager, must be called before starting a simulation.
  */
 extern "C" void init(void) {
-	thread_manager = new ThreadManager();
+   // Init random numbers so each run is different.
+   srand (time(NULL));
 
-	//thread_manager->CreateThreads(number_of_threads);
+   // Create the global thread manager.
+	thread_manager = new ThreadManager();
 }
 
 /**
- *
+ * Delete the thread manager.
  */
 extern "C" void cleanup(void) {
    delete thread_manager;
@@ -60,20 +65,71 @@ extern "C" void set_int(int t_thread, int t_variable, int t_value) {
  * 2 => Number of threads active.
  */
 extern "C" int get_int(int t_thread, int t_variable) {
-   //EvolutionThread *g = thread_manager->GetThread(t_thread);
+   Thread *g = thread_manager->GetThread(t_thread);
 
-   //return g->GetPopulation()->GetGeneration();
+   if (!g) return 0;
+
+   switch (t_variable) {
+   case 0:
+      return g->GetPopulation()->GetGeneration();
+      break;
+   case 1:
+      return g->GetPopulation()->GetNumberOfActiveMembers();
+      break;
+   }
+
+   //
+   return 0;
 }
 
 /**
  * Sets requested values in an array.
  * Possible values:
- * 0 => Average population fitness per generation.
+ * 0 => Average fitness in population per generation.
  * 1 => Maximum fitness in population per generation.
- * 2 => Calculation time per generation.
+ * 2 => Average number of components used
+ * 3 => Maximum number of components used.
+ * 4 => Total components used.
+ * 5 => Population size
+ * TODO: => Calculation time per generation.
  */
-extern "C" void get_double_array(int t_thread,int t_variable, double *t_values, int t_len) {
+extern "C" double *get_stats(int t_thread,int t_variable) {
+   Thread *g = thread_manager->GetThread(t_thread);
 
+   if (!g) return 0;
+
+   Statistics *stats = 0;
+
+   switch (t_variable) {
+   case 0:
+      stats = g->GetPopulation()->GetStatsAvgFitness();
+      break;
+   case 1:
+      stats = g->GetPopulation()->GetStatsMaxFitness();
+      break;
+   case 2:
+      stats = g->GetPopulation()->GetStatsAvgComponentsUsed();
+      break;
+   case 3:
+      stats = g->GetPopulation()->GetStatsMaxComponentsUsed();
+      break;
+   case 4:
+      stats = g->GetPopulation()->GetStatsTotalComponentsUsed();
+      break;
+   case 5:
+      stats = g->GetPopulation()->GetStatsPopulationSize();
+      break;
+   }
+
+   if (stats) {
+      double *f = (double*) malloc ( sizeof(double) * stats->GetLength());
+
+      for (int t=0; t<stats->GetLength(); t++) {
+         f[t] = stats->GetValue(t);
+      }
+      return f;
+   }
+   return 0;
 }
 
 /**

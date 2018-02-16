@@ -1,7 +1,13 @@
+/** @file statistics.h
+ *  @brief Keeps track of valuable information during evolution.
+ *
+ *  It is used in the Population class.
+ *  If you use more then 10000 generations, increase MAX_SIZE_STATISTICS.
+ */
 #ifndef STATISTICS_H
 #define STATISTICS_H
 
-// 10k generations!!
+// 10k generations to keep track of.
 #define MAX_SIZE_STATISTICS 10000
 
 

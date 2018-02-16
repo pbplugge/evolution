@@ -46,6 +46,10 @@ double Component::GetParameterValue(int t_parameter) {
    return m_parameter[t_parameter];
 }
 
+void Component::SetParameterValue(int t_parameter,double t_value) {
+   m_parameter[t_parameter] = t_value;
+}
+
 ComponentType *Component::GetComponentType(void) {
    return m_component_type;
 }
@@ -162,6 +166,9 @@ bool Component::InputIsConnectedTo(Component *t_component) {
    return false;
 }
 
+/**
+ * Get the number of connected inputs.
+ */
 int Component::NumberOfInputsConnected(void) {
    int c = 0;
 

@@ -1,7 +1,6 @@
 #include <stdlib.h>     // srand, rand, abs
 #include <stdio.h>      // printf
 #include <math.h>       // sqrt
-#include <iostream>
 
 #include "../../include/evolution.h"
 
@@ -56,9 +55,9 @@ Component *ComponentManager::CreateComponent(void) {
  * Called from the Program.
  */
 void ComponentManager::DestroyComponent(Component *c) {
-   int t;
+   unsigned int t;
 
-   for (unsigned int t = 0; t < m_component_count; t++) {
+   for (t = 0; t < m_component_count; t++) {
       if (m_component[t] == c) {
          c->Disconnect();
 
@@ -74,7 +73,9 @@ void ComponentManager::DestroyComponent(Component *c) {
    }
 }
 
-
+/**
+ * Getter for number of components.
+ */
 int ComponentManager::GetComponentCount(void) {
    return m_component_count;
 }

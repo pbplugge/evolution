@@ -5,7 +5,6 @@ using namespace evolution;
 
 
 Population::Population() {
-   std::cout << "Population::Population()\n";
    m_minimum_number_of_active_members = 0;
    m_individual = 0;
    m_generation = 0;
@@ -16,7 +15,6 @@ Population::Population() {
 
 
 Population::~Population() {
-   std::cout << "Population::~Population()\n";
    if (m_individual) {
       for (int t=0; t<m_maximum_number_of_numbers; t++) {
          delete m_individual[t];
@@ -60,7 +58,6 @@ void Population::IncreaseGeneration(void) {
 void Population::SortOnFitness(void) {
    int t;
    bool sort_done = false;
-   //bool newnumberone = false;
 
    while (!sort_done) {
       sort_done = true;
@@ -75,8 +72,6 @@ void Population::SortOnFitness(void) {
             Individual *b = m_individual[t];
             m_individual[t] = m_individual[t + 1];
             m_individual[t + 1] = b;
-            //if (t == 0)
-               //newnumberone = true;
          }
       }
    }
@@ -157,7 +152,7 @@ void Population::DoCrossOver(double t_crossover_chance) {
 
    if (m_number_of_active_members >= m_maximum_number_of_numbers)
       return;
-return;
+
    Individual *p1 = GetRandomParent();
    Individual *p2 = GetRandomParent();
    Individual *child = m_individual[m_number_of_active_members];
@@ -175,9 +170,10 @@ Individual *Population::GetIndividual(int t_index) {
 }
 
 void Population::CreateRandomIndividual(void) {
+   std::cout << "Population::CreateRandomIndividual() -> id=" << m_number_of_active_members << "\n";
    m_individual[m_number_of_active_members]->Randomize();
    m_number_of_active_members ++;
-   RepositionIndividualOnFitness(m_number_of_active_members);
+   RepositionIndividualOnFitness(m_number_of_active_members-1);
 }
 
 void Population::UpdateHallOfFame(void) {
@@ -241,16 +237,18 @@ Statistics *Population::GetStatsTotalComponentsUsed(void){
  */
 void Population::SetNumberOfActiveMembers(int t_number_of_active_members) {
    int t;
+
    // Clean up existing individuals if size decreased.
    if (t_number_of_active_members < m_number_of_active_members) {
       for (t=m_number_of_active_members-1; t>=t_number_of_active_members; t--) {
+         std::cout << "Population::SetNumberOfActiveMembers() -> individual[" << t << "] dies\n";
          m_individual[t]->Die();
       }
       m_number_of_active_members = t_number_of_active_members;
    }
 
    // Create new random individuals if size increased.
-   if (t_number_of_active_members > m_number_of_active_members) {
+   else if (t_number_of_active_members > m_number_of_active_members) {
       for (t=m_number_of_active_members; t<t_number_of_active_members; t++) {
          CreateRandomIndividual();
       }
@@ -267,13 +265,15 @@ void Population::CreateIndividualFromCrossOver(int t_index) {
    double total_fitness = 0.0f,f;
    int t,p1 = -1,p2 = -1;
 
+   std::cout << "Population::CreateIndividualFromCrossOver() -> id=" << t_index << "\n";
+
    // Calculate total fitness.
    for (t=0; t<m_number_of_active_members; t++) {
       if (t != t_index)
          total_fitness += m_individual[t]->GetAverageFitness();
    }
 
-   // If population has no fitness randomize the infividual.
+   // If population has no fitness randomize the individual.
    if (total_fitness == 0.0f) {
       m_individual[t_index]->Randomize();
       return;
@@ -304,10 +304,35 @@ void Population::CreateIndividualFromCrossOver(int t_index) {
    }
 
    if (p1 >= 0 && p2 >= 0) {
-      std::cout << "Population::CreateIndividualFromCrossOver() -> parents found: " << p1 << ", " << p2 << "\n";
+      std::cout << "Population::CreateIndividualFromCrossOver() -> parents found: " << p1 << " and " << p2 << " for individual " << t_index << "\n";
       m_individual[t_index]->Crossover(m_individual[p1],m_individual[p2]);
+
+      std::cout << "Population::DoCrossOver() -> child " << t_index  << " has " << m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
+
+      if (!m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount()) {
+         std::cout << "Population::CreateIndividualFromCrossOver() -> Error crossing over 2 individuals with " << m_individual[p1]->GetEvolutionaryProgram()->GetComponentCount() << " and " << m_individual[p2]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
+         exit(0);
+      }
+
    } else {
       std::cout << "Population::CreateIndividualFromCrossOver() -> Error while looking for parents: " << p1 << ", " << p2 << "\n";
+      exit(0);
+   }
+}
+
+/**
+ * Check for things that may not occur.
+ * Its for testing purposes only.
+ * It exits when an error is found.
+ */
+void Population::CheckForErrors(void) {
+   int t;
+
+   for (t=0; t<m_number_of_active_members; t++) {
+      if (m_individual[t]->GetEvolutionaryProgram()->GetComponentCount() == 0) {
+         std::cout << "Population::CheckForErrors() -> Individual[" << t << "] has no components.\n";
+         exit(0);
+      }
    }
 }
 

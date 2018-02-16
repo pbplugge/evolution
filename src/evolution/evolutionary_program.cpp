@@ -124,11 +124,11 @@ void EvolutionaryProgram::ShuffleAndReconnect(void) {
 
    DisconnectAll();
 
-   for (int t=0; t<10; t++) {
+   for (t=0; t<10; t++) {
       FlipTwoRandomComponents();
    }
 
-   for (int t=0; t<10; t++) {
+   for (t=0; t<10; t++) {
       AddRandomConnection();
    }
 }
@@ -184,8 +184,10 @@ void EvolutionaryProgram::RemoveComponentOnInputsRecursively(Component *t_compon
       if (t_component->InputIsConnectedTo(m_component[t])) {
          // Disconnect first to prevent an infinite loop.
          t_component->DisconnectFrom(m_component[t]);
+
          // Do the recursive part.
          RemoveComponentOnInputsRecursively(m_component[t],true);
+
          // Remove the component.
          if (t_remove) {
             RemoveComponent(t_component);
@@ -201,12 +203,22 @@ void EvolutionaryProgram::Crossover(EvolutionaryProgram *t_parent1, Evolutionary
    int t,r;
    Component *c;
 
+   if (!t_parent1->GetComponentCount()) {
+      std::cout << "EvolutionaryProgram::Crossover() -> Error: parent 1 has no components.\n";
+      exit(0);
+   }
+   if (!t_parent2->GetComponentCount()) {
+      std::cout << "EvolutionaryProgram::Crossover() -> Error: parent 2 has no components.\n";
+      exit(0);
+   }
+
    // First make this equal to parent 1.
    CopyFrom(t_parent1);
 
    // Pick one component that is the same type. 10 attempts.
    for (t=0; t<10; t++) {
       r = rand() % m_component_count;
+
       // Get component in parent 2's system of the same type.
       c = t_parent2->GetRandomComponentOfType(m_component[r]->GetComponentType());
       if (c) {
@@ -218,10 +230,15 @@ void EvolutionaryProgram::Crossover(EvolutionaryProgram *t_parent1, Evolutionary
 
          // Now sort this.
          OrderComponentsOnDependency();
-
          t = 10;
       }
    }
+
+   if (!m_component_count) {
+      std::cout << "EvolutionaryProgram::Crossover() -> Error: child has no components.\n";
+      exit(0);
+   }
+
 }
 
 /**
@@ -377,6 +394,9 @@ void EvolutionaryProgram::AddRandomConnection(void) {
    int in_index,out_index;
    int in_component_index,on_component_index;
 
+   if (!inputs || !outputs)
+      return;
+
    for (t=0; t<10; t++) {
       in_index = rand() % inputs;
       in = GetInputNode(in_index);
@@ -428,8 +448,11 @@ void EvolutionaryProgram::RemoveComponent(int t_index) {
    m_component_count--;
 }
 
+/**
+ * Remove component.
+ */
 void EvolutionaryProgram::RemoveComponent(Component *t_component){
-   int i,t;
+   int t;
 
    for (t = 0; t < m_component_count; t++) {
       if (t_component == m_component[t]) {
@@ -443,7 +466,7 @@ void EvolutionaryProgram::RemoveComponent(Component *t_component){
  * Try to remove random component 10 times.
  */
 void EvolutionaryProgram::RemoveRandomComponent(void) {
-   if (!m_component_count)
+   if (m_component_count < 2)
       return;
 
    int t, r;
@@ -569,15 +592,8 @@ int EvolutionaryProgram::GetOutputNodeCount(void) {
 ComponentInputNode *EvolutionaryProgram::GetInputNode(int n) {
    int t, c = 0;
 
-   //int inc = GetInputNodeCount();
-   //std::cout << "EvolutionaryProgram::GetInputNode(" << n << "/" << inc << ")\n";
-
    for (t = 0; t < m_component_count; t++) {
       if (n >= c && n < c + m_component[t]->GetInputNodeCount()) {
-         //std::cout << "b " << t << " "<< n << " " << c << " " << component[t]->GetInputNodeCount() << "\n";
-         //std::cout << component[t]->GetName() << " / " << component[t]->GetComponentType()->name  << "\n";
-         //std::cout << "node: " << (n-c) << " / " << component[t]->GetInputNodeCount() << "\n";
-         //std::cout << "node name: " << component[t]->GetInputNode(n - c)->GetName() << "\n";
          return m_component[t]->GetInputNode(n - c);
       }
       c += m_component[t]->GetInputNodeCount();
@@ -627,8 +643,9 @@ void EvolutionaryProgram::CopyFrom(EvolutionaryProgram *t_evolutionary_program) 
    Component *corg;
    ComponentType *ct;
    ComponentOutputNode *on;
+   EvolutionaryProgram *_this = this;
 
-   if (!this) {
+   if (!_this) {
       std::cout << "EvolutionaryProgram::CopyFrom() -> Error no this.\n";
       exit(1);
    }
@@ -687,13 +704,13 @@ void EvolutionaryProgram::CopyFrom(EvolutionaryProgram *t_evolutionary_program) 
  */
 void EvolutionaryProgram::CopyComponentOnInputsRecursively(EvolutionaryProgram *t_ep, int t_index, int t_ep_index) {
    int t,t2,source_index,my_index;
-   Component *c,*nc;
-   int first_new_component = m_component_count;
+   Component *nc;
    Component *corg;
    ComponentType *ct;
    ComponentOutputNode *on;
+   EvolutionaryProgram *_this = this;
 
-   if (!this) {
+   if (!_this) {
       std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> Error: no this.\n";
       exit(1);
    }

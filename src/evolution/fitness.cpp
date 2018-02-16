@@ -9,7 +9,7 @@ Fitness::Fitness(){
 }
 
 void Fitness::SetObjectiveFitness(int t_objective,double t_fitness) {
-   if (t_objective < 20) {
+   if (t_objective < MAX_NUMBER_OF_FITNESS_OBJECTIVES) {
       m_fitness[t_objective] = t_fitness;
    }
    if (t_objective+1 > m_number_of_objectives)
@@ -19,7 +19,7 @@ void Fitness::SetObjectiveFitness(int t_objective,double t_fitness) {
 }
 
 double Fitness::GetObjectiveFitness(int t_objective) {
-   if (t_objective >=20)
+   if (t_objective >= MAX_NUMBER_OF_FITNESS_OBJECTIVES)
       return 0;
    return m_fitness[t_objective];
 }
@@ -31,6 +31,7 @@ double Fitness::GetAverageFitness(void) {
 
 void Fitness::CopyFrom(Fitness *t_fitness) {
    m_number_of_objectives = t_fitness->m_number_of_objectives;
+   m_average_fitness = t_fitness->m_average_fitness;
    for (int t=0; t<m_number_of_objectives; t++)
       m_fitness[t] = t_fitness->m_fitness[t];
 }

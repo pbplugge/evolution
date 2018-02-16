@@ -1,3 +1,10 @@
+/** @file population.h
+ *  @brief Population of individuals.
+ *
+ *  It features statistics and hall of fame out of the box.
+ *
+ *  TODO: Prevent double individuals with a hashing system.
+ */
 #ifndef POPULATION_H
 #define POPULATION_H
 
@@ -8,12 +15,6 @@ namespace evolution {
    class Individual;
    class HallOfFame;
 
-   /**
-    * Population of individuals.
-    * The individuals are always sorted by fitness descending.
-    * Whenever one gets created or mutated, the fitness is recalculated and put on its new spot.
-    * It features statistics and hall of fame out of the box.
-    */
    class Population {
    public:
       Population();
@@ -40,6 +41,7 @@ namespace evolution {
       void RepositionIndividualOnFitness(int t_index);
       double GetIndividualTriangularNumber(int t_index);
       void CreateIndividualFromCrossOver(int t_index);
+      void CheckForErrors(void);
 
       Statistics *GetStatsAvgFitness(void);
       Statistics *GetStatsMaxFitness(void);
@@ -49,12 +51,7 @@ namespace evolution {
       Statistics *GetStatsTotalComponentsUsed(void);
 
       // TODO:
-      // void AddToPopulation(Individual *b);
-
-      // TODO:
-      // Prevent double individuals.
-
-      // TODO: statistics over time: avg fitness, max fitness, avg components used, max components used.
+      // void AddToPopulation(Individual *b); (must make copy of this individual and individual must use same component library)
 
    private:
       // The object that manages the components to optimize speed and memory use.

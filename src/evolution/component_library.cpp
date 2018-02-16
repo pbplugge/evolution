@@ -1,6 +1,4 @@
-#include <string>
 #include <stdio.h>
-#include <iostream>
 #include "../../include/evolution.h"
 
 

@@ -1,3 +1,10 @@
+/** @file thread.h
+ *  @brief Parent class for evolution implementations.
+ *
+ *  It controls the evolution.
+ *  The method of evolution is implemented here.
+ *  It contains the configuration and population.
+ */
 #ifndef EVOLUTION_MAIN_H
 #define EVOLUTION_MAIN_H
 
@@ -8,17 +15,12 @@
 #include "component_library.h"
 
 
-/**
- * Parent class for your evoluton implementation.
- * It controlls the evolution.
- * It contains the configuration and population.
- */
 namespace evolution {
-
    class Thread {
    public:
       Thread();
       virtual ~Thread();
+
 
       Config *GetConfig(void) { return &m_config; }
       Population *GetPopulation(void) { return &m_population; }
@@ -28,23 +30,31 @@ namespace evolution {
       void Start(void);
       void Stop(void);
 
-
       virtual void Init(void){}
       virtual void CalculateFitness(Individual *i){}
+      virtual bool ContinueEvolution(void){ return true; }
 
       void AddComponentType(ComponentType *t_component_type);
 
-   private:
-      bool m_stop;
+   protected:
+      // Population.
+      Population m_population;
 
       // The configuration.
       Config m_config;
 
-      // Population.
-      Population m_population;
-
       // Components allowed in the evolution.
       ComponentLibrary m_component_library;
+
+      // Algorithms.
+      virtual void DoAlgorithm(void);
+
+      void APGA(void);
+      void MutateExistingPopulation(void);
+
+   private:
+      bool m_stop;
+
 
       //void Debug(std::string fn, std::string msg, bool error = false);
 

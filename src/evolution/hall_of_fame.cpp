@@ -39,7 +39,7 @@ void HallOfFame::AddIndividual(Individual *t_individual) {
       n->CopyFrom(t_individual);
    }
 
-   Debug();
+   //Debug();
 }
 
 /**

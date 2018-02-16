@@ -1,8 +1,6 @@
 
 #include "../../include/evolution.h"
 
-#include <string>
-#include <iostream>
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <stdbool.h>
@@ -25,7 +23,6 @@ ThreadManager::~ThreadManager() {
 
 
 void runthread(Thread *t_thread) {
-   std::cout << "runthread() -> running thread\n";
    t_thread->Start();
 }
 
@@ -33,6 +30,11 @@ void runthread(Thread *t_thread) {
  * Start one evolution thread.
  */
 void ThreadManager::StartThread(Thread *t_thread) {
+   if (m_number_of_threads == MAX_THREADS - 1) {
+      std::cout << "ThreadManager::StartThread() -> Error: maximum number of threads reached.\n";
+      return;
+   }
+
    std::cout << "ThreadManager::StartThread()\n";
    m_thread[m_number_of_threads] = t_thread;
    m_number_of_threads ++;
@@ -44,6 +46,11 @@ void ThreadManager::StartThread(Thread *t_thread) {
  * Add thread without running.
  */
 void ThreadManager::AddThread(Thread *t_thread) {
+   if (m_number_of_threads == MAX_THREADS - 1) {
+      std::cout << "ThreadManager::AddThread() -> Error: maximum number of threads reached.\n";
+      return;
+   }
+
    m_thread[m_number_of_threads] = t_thread;
    m_number_of_threads ++;
 }

@@ -1,3 +1,9 @@
+/** @file component_library.h
+ *  @brief Contains the types of components available to an evolutionary program.
+ *
+ *  It should contain all available user defined component types.
+ *  Look at the experiments for how it is done.
+ */
 #ifndef EVOLUTION_LIBRARY_H
 #define EVOLUTION_LIBRARY_H
 
@@ -7,9 +13,6 @@ namespace evolution {
    class Thread;
    class ComponentType;
 
-   /**
-    * The library of components to use.
-    */
    class ComponentLibrary{
    public:
       ComponentLibrary();

@@ -1,13 +1,17 @@
+/** @file component_output_node.h
+ *  @brief The output node provides values that are produced by components.
+ *
+ *  It provides output for a component.
+ *  It has no knowledge about input nodes.
+ */
 #ifndef COMPONENT_OUTPUT_NODE
 #define COMPONENT_OUTPUT_NODE
 
+#include <string>
 
 namespace evolution{
    class Component;
 
-   /**
-    * The output node provides values that are produced by components.
-    */
    class ComponentOutputNode{
    public:
       void CopyFrom(ComponentOutputNode *org);
