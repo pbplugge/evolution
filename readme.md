@@ -4,8 +4,8 @@ For experimenting with Genetic programs / algorithms.
 
 __Features__
 
-* Object oriented c++ code
-* Python notebook examples
+* Easy to understand object oriented c++ code
+* Usable as shared library, python notebook examples included
 * Can handle genetic programs as well as genetic algorithms
 * Multi-threading
 * Hall of fame
@@ -23,7 +23,7 @@ Start python notebook in the notebooks directory.
 
 You can also use only C++ instead of python.
 Just check out main.cpp to see how simple that is.
-But either way you will need to create some C++ code simmilar to the code in the experiments directory.
+But either way you will need to create some C++ code simmilar to the code in the src/experiments directory.
 
 
 __Why__
