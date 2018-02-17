@@ -4,6 +4,7 @@ g++ -shared -o _evolution.so -fPIC \
     src/experiments/adding_two_numbers.cpp \
     src/experiments/test_mutations.cpp \
     src/experiments/complex_formula.cpp \
+    src/experiments/traveling_salesman.cpp \
     src/evolution/component.cpp \
     src/evolution/component_inputnode.cpp \
     src/evolution/component_library.cpp \
