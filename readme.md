@@ -2,7 +2,7 @@
 
 For experimenting with Genetic programs / algorithms.
 
-__features__
+__Features__
 
 * Object oriented c++ code
 * Python notebook examples
@@ -21,9 +21,9 @@ It should compile without errors or warnings.
 Put the created _evolution.so in the notebooks directory.
 Start python notebook in the notebooks directory.
 
-You can also use C++ instead of python.
-
-Either way you will need to create some C++ code simmilar to the code in the experiments directory.
+You can also use only C++ instead of python.
+Just check out main.cpp to see how simple that is.
+But either way you will need to create some C++ code simmilar to the code in the experiments directory.
 
 
 __Why__
@@ -43,3 +43,8 @@ __What is next?__
 I want to take evolutionary programming to the extreme.
 Not only a system that can do genetic evolutionary algorithms but parallel and recurrent systems forming bigger systems.
 The theory is if good components are chosen any application can generated.
+
+Some things i want to do first is check for double algorithms.
+Evolutionary programs/algorithms that are already attempted don't need to be re-calculated.
+For bigger systems and systems where the simulation time takes longer we don't want to simulate repeatedly.
+
