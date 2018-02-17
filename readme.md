@@ -1,19 +1,19 @@
-### A C++ Evolutionary programs / algorithms library for python.
+### A C++ Genetic programs / algorithms library.
 
-For my own project i could not find a library that does what i need it to do.
-A python library would be too slow. But i want to use python for my analysis.
-There are more reasons like evolving parameters inside nodes/components that influence the nodes/components.
-So i decided to write my own library.
+For experimenting with Genetic programs / algorithms.
 
-My design goal is an easy to use general purpose evolution library.
-You will need to be able to code some C++ but i made it very simple.
-With easy to follow examples and python notebooks 
+__features__
 
-My goal is to add to this project frequently. Hopefully some of you will join me in developing this.
+* Object oriented c++ code
+* Python notebook examples
+* Can handle genetic programs as well as genetic algorithms
+* Multi-threading
+* Hall of fame
+* Statistics
+* Very fast
 
-# This is just a first commit to get started. I will add & update new stuff soon.
 
-### How does it work?
+__How does it work?__
 
 Clone the repository.
 Go to the directory and execute build.sh
@@ -23,6 +23,23 @@ Start python notebook in the notebooks directory.
 
 You can also use C++ instead of python.
 
-Either way you will need to create some C++ code simmilar to the code of the examples.
+Either way you will need to create some C++ code simmilar to the code in the experiments directory.
 
-I will go in to more detail later.
+
+__Why__
+
+For my own project i could not find a library that does what i need it to do.
+A python library would be too slow for my purposes. But i want to use python for my analysis.
+The existing libraries i found could not evolve parameters inside nodes/components that influence them.
+So i decided to write my own library.
+
+My design goal is an easy to use general purpose genetic evolution library.
+You will need to be able to code some C++ but i made it very simple.
+With easy to follow examples and python notebooks 
+
+
+__What is next?__
+
+I want to take evolutionary programming to the extreme.
+Not only a system that can do genetic evolutionary algorithms but parallel and recurrent systems forming bigger systems.
+The theory is if good components are chosen any application can generated.
