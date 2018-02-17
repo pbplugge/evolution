@@ -8,6 +8,7 @@ __Features__
 * Usable as shared library, python notebook examples included
 * Can handle genetic programs as well as genetic algorithms
 * Multi-threading
+* Multi objective
 * Hall of fame
 * Statistics
 * Very fast
