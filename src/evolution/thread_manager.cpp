@@ -35,12 +35,17 @@ void ThreadManager::StartThread(Thread *t_thread) {
       return;
    }
 
-   std::cout << "ThreadManager::StartThread()\n";
    m_thread[m_number_of_threads] = t_thread;
+   m_std_sthread[m_number_of_threads] = std::thread(runthread, t_thread);
    m_number_of_threads ++;
-   std::thread t(runthread, t_thread);
-   t.join();
 }
+
+void ThreadManager::Wait(void) {
+   for (int t=0;t<m_number_of_threads; t++)
+      m_std_sthread[t].join();
+
+}
+
 
 /**
  * Add thread without running.

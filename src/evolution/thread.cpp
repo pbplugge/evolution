@@ -133,7 +133,6 @@ void Thread::DoAlgorithm(void) {
  * Start generator.
  */
 void Thread::Start(void) {
-   std::cout << "Thread::Start()\n";
 
    if (m_component_library.GetNumberOfComponentTypes() == 0) {
       // Virtual function.

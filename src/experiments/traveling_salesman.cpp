@@ -14,10 +14,6 @@ using namespace evolution;
 
 extern ThreadManager *thread_manager;
 
-class ComponentTypeAdd;
-class ComponentTypeInput;
-class MathematicalFormulaApproacher;
-
 
 // Create component type for adding.
 class TSPCoordinate:public ComponentType {
@@ -159,6 +155,8 @@ extern "C" void experiment_traveling_salesman_problem(void) {
    TSP *traveling_salesman_problem = new TSP();
 
    thread_manager->StartThread(traveling_salesman_problem);
+
+   thread_manager->Wait();
 }
 
 

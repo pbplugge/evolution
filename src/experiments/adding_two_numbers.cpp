@@ -145,6 +145,8 @@ extern "C" void experiment_adding_two_numbers(void) {
    MathematicalFormulaApproacher *domain = new MathematicalFormulaApproacher();
 
    thread_manager->StartThread(domain);
+
+   thread_manager->Wait();
 }
 
 

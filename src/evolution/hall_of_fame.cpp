@@ -18,7 +18,7 @@ HallOfFame::~HallOfFame() {
 }
 
 void HallOfFame::AddIndividual(Individual *t_individual) {
-   std::cout << "HallOfFame::AddIndividual(): " << t_individual->GetAverageFitness() << "\n";
+   //std::cout << "HallOfFame::AddIndividual(): " << t_individual->GetAverageFitness() << "\n";
 
    // Check its place on the list.
    int t, i = -1;

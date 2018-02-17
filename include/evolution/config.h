@@ -41,10 +41,6 @@ namespace evolution {
       void SetRandomIndividualChance(double t_random_individual_chance);
       double GetRandomIndividualChance(void);
 
-      // Adders
-      void AddPrimitive(char *p);
-      void AddTerminal(char *p,int constant);
-
    private:
       int m_maximum_number_of_generations;
       int m_minimum_population_size;

@@ -87,4 +87,6 @@ extern "C" void experiment_test_mutations(void) {
    i[9]->GetEvolutionaryProgram()->ShuffleAndReconnect();
 
    std::cout << "experiment_test_mutations() done\n";
+
+   thread_manager->Wait();
 }

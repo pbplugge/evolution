@@ -11,7 +11,6 @@ using namespace evolution;
  * Construct.
  */
 ComponentManager::ComponentManager() {
-   std::cout << "ComponentManager::ComponentManager()\n";
    m_component_count = 0;
    m_components_allocated = 0;
 }
@@ -22,11 +21,8 @@ ComponentManager::ComponentManager() {
 ComponentManager::~ComponentManager() {
    unsigned int t;
 
-   std::cout << "ComponentManager::~ComponentManager()\n";
    for (t = 0; t < m_components_allocated; t++)
       delete m_component[t];
-
-   std::cout << "ComponentManager::~ComponentManager() done\n";
 }
 
 /**

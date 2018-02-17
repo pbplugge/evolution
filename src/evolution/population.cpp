@@ -25,7 +25,7 @@ Population::~Population() {
    if (m_hall_of_fame)
       delete m_hall_of_fame;
 
-   std::cout << "Population::~Population() done\n";
+   //std::cout << "Population::~Population() done\n";
 }
 
 void Population::CreatePopulation(int t_minimum_number_of_active_members,int t_maximum_number_of_numbers, ComponentLibrary *t_component_library){
@@ -170,7 +170,7 @@ Individual *Population::GetIndividual(int t_index) {
 }
 
 void Population::CreateRandomIndividual(void) {
-   std::cout << "Population::CreateRandomIndividual() -> id=" << m_number_of_active_members << "\n";
+   //std::cout << "Population::CreateRandomIndividual() -> id=" << m_number_of_active_members << "\n";
    m_individual[m_number_of_active_members]->Randomize();
    m_number_of_active_members ++;
    RepositionIndividualOnFitness(m_number_of_active_members-1);
@@ -265,7 +265,7 @@ void Population::CreateIndividualFromCrossOver(int t_index) {
    double total_fitness = 0.0f,f;
    int t,p1 = -1,p2 = -1;
 
-   std::cout << "Population::CreateIndividualFromCrossOver() -> id=" << t_index << "\n";
+   //std::cout << "Population::CreateIndividualFromCrossOver() -> id=" << t_index << "\n";
 
    // Calculate total fitness.
    for (t=0; t<m_number_of_active_members; t++) {
@@ -304,10 +304,10 @@ void Population::CreateIndividualFromCrossOver(int t_index) {
    }
 
    if (p1 >= 0 && p2 >= 0) {
-      std::cout << "Population::CreateIndividualFromCrossOver() -> parents found: " << p1 << " and " << p2 << " for individual " << t_index << "\n";
+      //std::cout << "Population::CreateIndividualFromCrossOver() -> parents found: " << p1 << " and " << p2 << " for individual " << t_index << "\n";
       m_individual[t_index]->Crossover(m_individual[p1],m_individual[p2]);
 
-      std::cout << "Population::DoCrossOver() -> child " << t_index  << " has " << m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
+      //std::cout << "Population::DoCrossOver() -> child " << t_index  << " has " << m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
 
       if (!m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount()) {
          std::cout << "Population::CreateIndividualFromCrossOver() -> Error crossing over 2 individuals with " << m_individual[p1]->GetEvolutionaryProgram()->GetComponentCount() << " and " << m_individual[p2]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
