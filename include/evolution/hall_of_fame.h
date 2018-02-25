@@ -18,6 +18,7 @@ namespace evolution {
       ~HallOfFame();
 
       void AddIndividual(Individual *t_individual);
+      Individual *GetIndividual(int t);
    private:
       Individual *m_individual[HALL_OF_FAME_INDIVIDUALS];
 

@@ -1,70 +1,15 @@
 /** @file adding_two_numbers.cpp
- *  @brief Evolution that generates a formula to get the number 4.
+ *  @brief Evolution that generates a formula using addition to get the number 1.5.
  */
 #include <cmath>
 #include "../../include/evolution.h"
-
 
 using namespace evolution;
 
 extern ThreadManager *thread_manager;
 
-class ComponentTypeAdd;
-class ComponentTypeInput;
-class MathematicalFormulaApproacher;
 
-
-// Create component type for adding.
-class ComponentTypeAdd:public ComponentType {
-public:
-   ComponentTypeAdd() {
-      m_number_of_inputs = 2;
-      m_number_of_outputs = 1;
-      m_number_of_parameters = 0;
-      m_name = "add";
-      m_input_node_type[0] = input_node_type_double;
-      m_input_node_type[1] = input_node_type_double;
-      m_output_node_type[0] = input_node_type_double;
-
-      m_max_number_of_components = 1;
-      m_req_number_of_components = 1;
-   }
-
-   void Execute(Component *t_component) {
-      double v1 = t_component->GetInputValue(0)*2;
-      double v2 = t_component->GetInputValue(1)*6;
-
-      std::cout << "Adding " << v1 << " and " << v2 << ".\n";
-
-      t_component->SetOutputValue(0,v1+v2);
-   }
-};
-
-
-// Create component type for input values for the adder.
-class ComponentTypeInput:public ComponentType {
-public:
-   ComponentTypeInput() {
-      m_number_of_inputs = 0;
-      m_number_of_outputs = 1;
-      m_number_of_parameters = 1;
-      m_name = "input";
-      m_output_node_type[0] = input_node_type_double;
-
-      m_max_number_of_components = 2;
-      m_req_number_of_components = 2;
-   }
-
-   void Execute(Component *t_component){
-      double v = t_component->GetParameterValue(0);
-
-      std::cout << "ComponentTypeInput:Execute() -> " << v << "\n";
-      t_component->SetOutputValue(0,v);
-   }
-};
-
-
-// Experiment to aproach a mathematical formula 1+3 = 4.
+// Experiment to aproach a mathematical formula x + y = 1.5.
 class MathematicalFormulaApproacher: public evolution::Thread {
 public:
    ~MathematicalFormulaApproacher(){
@@ -74,12 +19,18 @@ public:
    // Add components we want to use to the library.
    void Init(void) {
       std::cout << "MathematicalFormulaApproacher::Init()\n";
-      GetConfig()->SetMinimumPopulationSize(4);
-      GetConfig()->SetMaximumPopulationSize(100);
+      GetConfig()->SetMinimumPopulationSize(5);
+      GetConfig()->SetMaximumPopulationSize(6);
 
       component_add = new ComponentTypeAdd();
+      component_add->SetMaximumComponents(1);
+      component_add->SetRequiredComponents(1);
       AddComponentType(component_add);
-      AddComponentType(new ComponentTypeInput());
+
+      component_input = new ComponentTypeParameterAsOutput();
+      component_input->SetMaximumComponents(2);
+      component_input->SetRequiredComponents(2);
+      AddComponentType(component_input);
    }
 
    // Required fitness function.
@@ -102,7 +53,7 @@ public:
          }
 
          // Objective 2: the output must be equal to 4.
-         v = c->GetOutputNode(0)->GetValue() / 4;
+         v = c->GetOutputNode(0)->GetValue();
          double fitness = 1 - (fabs(v-1));
          t_individual->SetObjectiveFitness(1,fitness);
 
@@ -128,13 +79,14 @@ public:
       //m_population.SortOnFitness();
       double fitness = m_population.GetIndividual(0)->GetAverageFitness();
       std::cout << "Fitness: " << fitness << "\n";
-      if (fitness > 0.99) {
+      if (fitness > 0.99 || m_population.GetGeneration() == 1000) {
          return false;
       }
       return true;
    }
 private:
    ComponentType *component_add;
+   ComponentType *component_input;
 };
 
 
@@ -147,6 +99,8 @@ extern "C" void experiment_adding_two_numbers(void) {
    thread_manager->StartThread(domain);
 
    thread_manager->Wait();
+
+   // Since we want to use this data from python notebook we can't delete the thread here.
 }
 
 

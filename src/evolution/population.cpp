@@ -28,6 +28,9 @@ Population::~Population() {
    //std::cout << "Population::~Population() done\n";
 }
 
+/**
+ * Creates 't_minimum_number_of_active_members' random individuals.
+ */
 void Population::CreatePopulation(int t_minimum_number_of_active_members,int t_maximum_number_of_numbers, ComponentLibrary *t_component_library){
    int t;
 
@@ -55,6 +58,9 @@ void Population::IncreaseGeneration(void) {
    m_generation ++;
 }
 
+/**
+ * Sorts population by fitness descending.
+ */
 void Population::SortOnFitness(void) {
    int t;
    bool sort_done = false;
@@ -77,6 +83,9 @@ void Population::SortOnFitness(void) {
    }
 }
 
+/**
+ * TODO: Want ro depricate this and always use the sortonfitness function.
+ */
 void Population::RepositionIndividualOnFitness(int t_index) {
    int t;
    Individual *i = m_individual[t_index];
@@ -170,16 +179,25 @@ Individual *Population::GetIndividual(int t_index) {
 }
 
 void Population::CreateRandomIndividual(void) {
+   if (m_number_of_active_members >= m_maximum_number_of_numbers)
+      return;
+
    //std::cout << "Population::CreateRandomIndividual() -> id=" << m_number_of_active_members << "\n";
    m_individual[m_number_of_active_members]->Randomize();
    m_number_of_active_members ++;
    RepositionIndividualOnFitness(m_number_of_active_members-1);
 }
 
+/**
+ * Update hall of fame with best individual which should be sorted at the top.
+ */
 void Population::UpdateHallOfFame(void) {
    m_hall_of_fame->AddIndividual(m_individual[0]);
 }
 
+/**
+ * Calculate statistics.
+ */
 void Population::UpdateStatistics(void) {
    int t;
    double f, avgf = 0,maxf = 0,avgc;
@@ -265,7 +283,7 @@ void Population::CreateIndividualFromCrossOver(int t_index) {
    double total_fitness = 0.0f,f;
    int t,p1 = -1,p2 = -1;
 
-   //std::cout << "Population::CreateIndividualFromCrossOver() -> id=" << t_index << "\n";
+   std::cout << "Population::CreateIndividualFromCrossOver() -> id=" << t_index << "\n";
 
    // Calculate total fitness.
    for (t=0; t<m_number_of_active_members; t++) {
@@ -304,10 +322,10 @@ void Population::CreateIndividualFromCrossOver(int t_index) {
    }
 
    if (p1 >= 0 && p2 >= 0) {
-      //std::cout << "Population::CreateIndividualFromCrossOver() -> parents found: " << p1 << " and " << p2 << " for individual " << t_index << "\n";
+      std::cout << "Population::CreateIndividualFromCrossOver() -> parents found: " << p1 << " and " << p2 << " for individual " << t_index << "\n";
       m_individual[t_index]->Crossover(m_individual[p1],m_individual[p2]);
 
-      //std::cout << "Population::DoCrossOver() -> child " << t_index  << " has " << m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
+      std::cout << "Population::DoCrossOver() -> child " << t_index  << " has " << m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
 
       if (!m_individual[t_index]->GetEvolutionaryProgram()->GetComponentCount()) {
          std::cout << "Population::CreateIndividualFromCrossOver() -> Error crossing over 2 individuals with " << m_individual[p1]->GetEvolutionaryProgram()->GetComponentCount() << " and " << m_individual[p2]->GetEvolutionaryProgram()->GetComponentCount() << " components\n";
@@ -335,4 +353,9 @@ void Population::CheckForErrors(void) {
       }
    }
 }
+
+HallOfFame *Population::GetHallOfFame(void) {
+   return m_hall_of_fame;
+}
+
 

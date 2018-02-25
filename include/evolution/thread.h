@@ -51,15 +51,19 @@ namespace evolution {
 
       void APGA(void);
       void MutateExistingPopulation(void);
+      void CreatePopulationFromBest(void);
 
    private:
+      bool ResetAfterGenerationsWithoutImprovement(void);
+
+      int m_generations_without_improvement;
+      double m_fittest;
+
       bool m_stop;
 
 
-      //void Debug(std::string fn, std::string msg, bool error = false);
-
-      // TODO: keep track of simulation time per cycle.
-
+      // TODO: keep track of simulation time per generation.
+      // Statistics m_time_per_generation.
    };
 }
 

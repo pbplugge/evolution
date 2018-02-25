@@ -17,9 +17,9 @@ public:
       m_number_of_outputs = 1;
       m_number_of_parameters = 1;
       m_name = "test";
-      m_input_node_type[0] = input_node_type_double;
-      m_input_node_type[1] = input_node_type_double;
-      m_output_node_type[0] = input_node_type_double;
+      m_input_node_type[0] = component_node_type_double;
+      m_input_node_type[1] = component_node_type_double;
+      m_output_node_type[0] = component_node_type_double;
 
       m_max_number_of_components = 10;
       m_req_number_of_components = 2;

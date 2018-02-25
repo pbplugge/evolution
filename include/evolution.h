@@ -8,6 +8,7 @@
 #include "evolution/component_manager.h"
 #include "evolution/component_outputnode.h"
 #include "evolution/component_type.h"
+#include "evolution/component_types.h"
 #include "evolution/component.h"
 #include "evolution/config.h"
 #include "evolution/evolutionary_program.h"

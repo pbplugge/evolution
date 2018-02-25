@@ -51,3 +51,14 @@ void HallOfFame::Debug(void) {
       std::cout << (t+1) << ") " << m_individual[t]->GetAverageFitness() << "\n";
    }
 }
+
+/**
+ * Get Individual on spot t_index.
+ */
+Individual *HallOfFame::GetIndividual(int t_index) {
+   if (t_index >= HALL_OF_FAME_INDIVIDUALS) {
+      std::cout << "HallOfFame::GetIndividual() -> ERROR: m_individual[" << t_index << " bigger then maximum\n";
+      exit(1);
+   }
+   return m_individual[t_index];
+}

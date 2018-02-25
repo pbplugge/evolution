@@ -142,3 +142,13 @@ bool ComponentInputNode::IsConnected(void){
       return true;
    return false;
 }
+
+/**
+ * Disconnect if connected to given component.
+ */
+void ComponentInputNode::DisconnectFrom(Component *t_component) {
+   if (m_connected_to) {
+      if (m_connected_to->GetComponent() == t_component)
+         m_connected_to = 0;
+   }
+}

@@ -51,6 +51,8 @@ namespace evolution {
       bool InputIsConnectedTo(Component *t_component);
       void Disconnect(void);
       int NumberOfInputsConnected(void);
+      void SetCustomData(void *);
+      void *GetCustomData(void);
 
    private:
       // Pointer to the component type in the library.
@@ -64,6 +66,9 @@ namespace evolution {
 
       // parameters.
       double m_parameter[20];
+
+      // Data required by some component types.
+      void *m_data;
    };
 }
 

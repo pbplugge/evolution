@@ -157,6 +157,8 @@ extern "C" void experiment_traveling_salesman_problem(void) {
    thread_manager->StartThread(traveling_salesman_problem);
 
    thread_manager->Wait();
+
+   // Since we want to use this data from python notebook we can't delete the thread here.
 }
 
 

@@ -28,7 +28,7 @@ Just check out main.cpp to see how simple that is.
 But either way you will need to create some C++ code simmilar to the code in the src/experiments directory.
 
 
-__Why__
+__Why?__
 
 For my own project i could not find a library that does what i need it to do.
 A python library would be too slow for my purposes. But i want to use python for my analysis.
@@ -38,6 +38,19 @@ So i decided to write my own library.
 My design goal is an easy to use general purpose genetic evolution library.
 You will need to be able to code some C++ but i made it very simple.
 With easy to follow examples and python notebooks 
+
+
+__Implemented examples__
+
+In the directory experiments i have build some examples on how to build your own algoritm.
+These are:
+
+* Traveling salesman problem.
+* Creating a formula that adds 2 numbers to total 1.5. The numbers are not pre-defined but evolve too.
+* Multi-threading example.
+* Adding custom data to your own components example.
+* Evolution to evolve on sequential data. This example has 2 inputs and 2 outputs and a 2 objective fitness function.
+* Example on how to do different types of mutations.
 
 
 __What is next?__
@@ -50,9 +63,9 @@ Some things i want to do first is check for double algorithms.
 Evolutionary programs/algorithms that are already attempted don't need to be re-calculated.
 For bigger systems and systems where the simulation time takes longer we don't want to simulate repeatedly.
 
-I want to implement NEAT with this library. It means an evolving neural networks Google if you want to know more.
+I want to implement NEAT with this library. It means an evolving neural networks. Google if you want to know more.
 
-Besides evolution by random mutations i want to create an algorithm that iterates systematicly to a (local?) optimum.
+Besides evolution by random mutations i want to create an algorithm that iterates systematically to a (local?) optimum.
 So take x points over all dimensions and try all combinations.
 Where the best result was found again but 1/10th of the search space in all dimensions.
 

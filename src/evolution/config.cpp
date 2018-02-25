@@ -11,6 +11,7 @@ Config::Config() {
    m_parameter_mutation_chance = 0.1f;
    m_crossover_chance = 0.1f;
    m_random_individual_chance = 0.01f;
+   m_randomize_after_generations_without_improvement = 3000000;
 }
 
 void Config::SetMaximumGenerations(int t_maximum_number_of_generations) {
@@ -68,3 +69,12 @@ void Config::SetRandomIndividualChance(double t_random_individual_chance) {
 double Config::GetRandomIndividualChance(void) {
    return m_random_individual_chance;
 }
+
+int Config::GetRandomizeAfterGenerationsWithoutImprovement(void){
+   return m_randomize_after_generations_without_improvement;
+}
+
+void Config::SetRandomizeAfterGenerationsWithoutImprovement(int t_generations) {
+   m_randomize_after_generations_without_improvement = t_generations;
+}
+

@@ -41,6 +41,9 @@ namespace evolution {
       void SetRandomIndividualChance(double t_random_individual_chance);
       double GetRandomIndividualChance(void);
 
+      void SetRandomizeAfterGenerationsWithoutImprovement(int t_generations);
+      int GetRandomizeAfterGenerationsWithoutImprovement(void);
+
    private:
       int m_maximum_number_of_generations;
       int m_minimum_population_size;
@@ -50,6 +53,7 @@ namespace evolution {
       double m_parameter_mutation_chance;
       double m_crossover_chance;
       double m_random_individual_chance;
+      int m_randomize_after_generations_without_improvement;
    };
 }
 

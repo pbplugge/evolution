@@ -40,6 +40,7 @@ Component *ComponentManager::CreateComponent(void) {
       m_component_count++;
       m_components_allocated++;
    } else {
+      m_component[m_component_count]->Disconnect();
       m_component_count++;
    }
 
@@ -55,8 +56,6 @@ void ComponentManager::DestroyComponent(Component *c) {
 
    for (t = 0; t < m_component_count; t++) {
       if (m_component[t] == c) {
-         c->Disconnect();
-
          m_component_count--;
 
          if (t != m_component_count) {

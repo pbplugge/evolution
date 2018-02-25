@@ -10,8 +10,8 @@
  *  - The minimum and maximum number of these components should exist.
  *  - The name of the component type.
  *  - The number of parameters inside a component that can evolve.
- *
- *  TODO: Getters and setters should be implemented.
+ *  - The virtual functions InitComponent() and ClearComponent() are to add/remove data to/from a component when it is created/deleted.
+ *  - The virtual function ResetForNextSimulation is called when calculating fitness if necessary.
  */
 #ifndef COMPONENT_TYPE_H
 #define COMPONENT_TYPE_H
@@ -24,10 +24,10 @@ namespace evolution {
    class Component;
 
 
-   enum input_node_type {
-      input_node_type_double,
-      input_node_type_int,
-      input_node_type_bool
+   enum component_node_type {
+      component_node_type_double,
+      component_node_type_int,
+      component_node_type_bool
    };
 
    /**
@@ -35,14 +35,45 @@ namespace evolution {
     */
    class ComponentType {
    public:
-      virtual void Execute(Component *) = 0;
+      virtual void Execute(Component *t_component) = 0;
       virtual ~ComponentType(){};
+      virtual void InitComponent(Component *t_component){}
+      virtual void ClearComponent(Component *t_component){}
+      virtual void ResetForNextSimulation(Component *t_component){}
+
+
+      // Getters and setters.
+      void SetNumberOfInputs(int t_number_of_inputs);
+      int GetNumberOfInputs(void);
+
+      void SetNumberOfOutputs(int t_number_of_outputs);
+      int GetNumberOfOutputs(void);
+
+      void SetInputType(int t_index,component_node_type t_type);
+      component_node_type GetInputType(int t_index);
+
+      void SetOutputType(int t_index,component_node_type t_type);
+      component_node_type GetOutputType(int t_index);
+
+      void SetName(std::string t_name);
+      std::string GetName(void);
+
+      void SetRequiredComponents(int t_required_components);
+      int GetRequiredComponents(void);
+
+      void SetMaximumComponents(int t_maximum_components);
+      int GetMaximumComponents(void);
+
+      void SetNumberOfParameters(int t_number_of_parameters);
+      int GetNumberOfParameters(void);
+
+   protected:
 
       int m_number_of_inputs;
       int m_number_of_outputs;
 
-      int m_input_node_type[20];
-      int m_output_node_type[20];
+      component_node_type m_input_node_type[20];
+      component_node_type m_output_node_type[20];
 
       std::string m_name;
 

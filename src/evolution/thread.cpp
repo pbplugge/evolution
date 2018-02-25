@@ -8,6 +8,8 @@ using namespace evolution;
  */
 Thread::Thread() {
    m_stop = false;
+   m_generations_without_improvement = 0;
+   m_fittest = 0;
 }
 
 /**
@@ -25,12 +27,13 @@ Thread::~Thread() {
  * - Individuals with better fitness live longer.
  * - If improvement on average fitness or best fitness, reduce population size with 1. Else increase population size with 1.
  * - Not the complete population needs to be simulated each generation, only on birth.
+ *
+ * TODO: crossover number of components spring out of control.
  */
 void Thread::APGA(void) {
    int t;
 
-   //std::cout << "Thread::Start() generation: " << m_population.GetGeneration() << "\n";
-   //std::cout << "Thread::Start() population size: " << m_population.GetNumberOfActiveMembers() << "\n";
+   //std::cout << "Thread::APGA() population size: " << m_population.GetNumberOfActiveMembers() << "\n";
 
    // Change population size depending on average and best fitness.
    if (m_population.GetGeneration() > 1) {
@@ -52,7 +55,7 @@ void Thread::APGA(void) {
          m_population.RepositionIndividualOnFitness(t);
       }
    }
-   //std::cout << "Thread::Start() new population size: " << m_population.GetNumberOfActiveMembers() << "\n";
+   std::cout << "Thread::APGA() new population size: " << m_population.GetNumberOfActiveMembers() << "\n";
 
    // Reduce age depending on its ranking.
    // TODO: make speed of aging & target age configurable.
@@ -60,15 +63,18 @@ void Thread::APGA(void) {
       double age = m_population.GetIndividual(t)->GetAge();
       double aging = 1.0f - m_population.GetIndividual(t)->GetAverageFitness();
 
-      //std::cout << "Thread::Start() individual " << t << " ages with " << aging << "\n";
+      //std::cout << "Thread::APGA() individual " << t << " ages with " << aging << "\n";
 
       age -= aging;
       m_population.GetIndividual(t)->SetAge(age);
 
+
       // If it dies from old age, replace by a offspring.
       if (age < 0) {
          m_population.GetIndividual(t)->Die();
-         m_population.CreateIndividualFromCrossOver(t);
+         //m_population.CreateIndividualFromCrossOver(t);
+         m_population.GetIndividual(t)->Randomize();
+
          m_population.GetIndividual(t)->SetAge(10);
       }
    }
@@ -83,6 +89,8 @@ void Thread::APGA(void) {
 
    // Calculate the fitness of each individual that is marked as dirty.
    for (t=0; t<m_population.GetNumberOfActiveMembers(); t++) {
+      //std::cout << "x " << t << "\n";
+
       if (m_population.GetIndividual(t)->Dirty()) {
          m_population.GetIndividual(t)->ClearDirty();
          CalculateFitness(m_population.GetIndividual(t));
@@ -123,10 +131,65 @@ void Thread::MutateExistingPopulation(void) {
    m_population.RemoveWeakestFromPopulation();
 }
 
+/**
+ * Create population from mutations on the best individuals.
+ */
+void Thread::CreatePopulationFromBest(void) {
+   int t;
+
+   // Copy the best and do mutations.
+   for (t=1; t<m_population.GetNumberOfActiveMembers(); t++) {
+      m_population.GetIndividual(t)->CopyFrom(m_population.GetIndividual(0));
+      m_population.GetIndividual(t)->MutateParameters(m_config.GetParameterMutationChance());
+      m_population.GetIndividual(t)->MutateStructure(m_config.GetStructureMutationChance());
+      if (m_population.GetIndividual(t)->Dirty()) {
+         m_population.GetIndividual(t)->ClearDirty();
+         CalculateFitness(m_population.GetIndividual(t));
+      }
+   }
+
+   // Resort the population on fitness.
+   m_population.SortOnFitness();
+}
+
 
 void Thread::DoAlgorithm(void) {
    //MutateExistingPopulation();
-   APGA();
+   //APGA();
+   CreatePopulationFromBest();
+}
+
+/**
+ * If configured number of generations there was no improvement, reset all individuals.
+ * If its reset, returns true.
+ */
+bool Thread::ResetAfterGenerationsWithoutImprovement(void){
+   m_generations_without_improvement  ++;
+
+   // Check if fitter individual.
+   if (m_population.GetIndividual(0)->GetAverageFitness() > m_fittest) {
+      m_fittest = m_population.GetIndividual(0)->GetAverageFitness();
+      m_generations_without_improvement = 0;
+      return false;
+   }
+
+   m_generations_without_improvement ++;
+
+   if (m_generations_without_improvement < m_config.GetRandomizeAfterGenerationsWithoutImprovement())
+      return false;
+
+   m_fittest = 0;
+   m_generations_without_improvement = 0;
+
+   for (int t=0; t<m_population.GetNumberOfActiveMembers(); t++) {
+      m_population.GetIndividual(t)->Randomize();
+      CalculateFitness(m_population.GetIndividual(t));
+   }
+
+   // Resort the population on fitness.
+   m_population.SortOnFitness();
+
+   return true;
 }
 
 /**
@@ -140,14 +203,27 @@ void Thread::Start(void) {
    }
 
    if (!m_population.GetNumberOfActiveMembers()) {
+      std::cout << "Thread::Start() -> Creating population\n";
       m_population.CreatePopulation(m_config.GetMinimumPopulationSize(),m_config.GetMaximumPopulationSize(),&m_component_library);
+
+      // Make sure we know the fitness.
+      for (int t=0; t<m_population.GetNumberOfActiveMembers(); t++) {
+         if (m_population.GetIndividual(t)->Dirty()) {
+            m_population.GetIndividual(t)->ClearDirty();
+            CalculateFitness(m_population.GetIndividual(t));
+         }
+      }
+
+      // Resort the population on fitness.
+      m_population.SortOnFitness();
    }
 
    while (!m_stop && ContinueEvolution()) {
-      // Execute the virtual function DoAlgorithm.
-      DoAlgorithm();
-
       // Standard stuff for each algorithm below.
+      if (!ResetAfterGenerationsWithoutImprovement()){
+         // Execute the virtual function DoAlgorithm.
+         DoAlgorithm();
+      }
 
       // Save the best in hall of fame.
       m_population.UpdateHallOfFame();

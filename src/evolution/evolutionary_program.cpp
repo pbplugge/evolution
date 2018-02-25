@@ -23,18 +23,100 @@ void EvolutionaryProgram::SetComponentLibrary(ComponentLibrary *t_component_libr
  */
 void EvolutionaryProgram::Reset(void) {
    Cleanup();
-   AddRequiredComponents();
+   CorrectComponentTypeAmounts();
 }
 
 /**
  * Cleanup removes existing components.
  */
 void EvolutionaryProgram::Cleanup(void) {
-   if (m_component_count > 0) {
-      for (int t=0; t<m_component_count; t++)
-         m_component_manager->DestroyComponent(m_component[t]);
+   while (m_component_count > 0) {
+      RemoveComponent(m_component_count-1);
    }
-   m_component_count = 0;
+}
+
+/**
+ * Remove a component of a given type.
+ */
+void EvolutionaryProgram::RemoveComponentOfType(ComponentType *t_type) {
+   for (int t=0; t < m_component_count; t++) {
+      if (m_component[t]->GetComponentType() == t_type) {
+         RemoveComponent(t);
+         return;
+      }
+   }
+}
+
+/**
+ * Remove component.
+ */
+void EvolutionaryProgram::RemoveComponent(int t_index) {
+   Component *c = m_component[t_index];
+   int r;
+
+   if (t_index >= m_component_count) {
+      std::cout << "EvolutionaryProgram::RemoveComponent() -> Error: t_index (" << t_index << ") should be lower then m_component_count (" << m_component_count << ")\n";
+      exit(1);
+   }
+
+   if (m_component_count > 1) {
+      // Disconnect from all inputs.
+      for (r = 0; r < m_component_count; r++) {
+         m_component[r]->DisconnectFrom(c);
+      }
+
+      c->Disconnect();
+
+      m_component[t_index] = 0;
+
+      // Remove component but keep the order of components.
+      for (r = t_index; r < m_component_count - 1; r++) {
+         m_component[r] = m_component[r + 1];
+      }
+   }
+
+   c->GetComponentType()->ClearComponent(c);
+   m_component_manager->DestroyComponent(c);
+
+   m_component_count--;
+}
+
+/**
+ * Remove component.
+ */
+void EvolutionaryProgram::RemoveComponent(Component *t_component){
+   int t;
+
+   for (t = 0; t < m_component_count; t++) {
+      if (t_component == m_component[t]) {
+         RemoveComponent(t);
+         return;
+      }
+   }
+}
+
+/**
+ * Try to remove random component 10 times.
+ */
+void EvolutionaryProgram::RemoveRandomComponent(void) {
+   if (m_component_count < 2)
+      return;
+
+   int t, r;
+
+   for (t = 0; t < 10; t++) {
+      r = rand() % m_component_count;
+
+      Component *c = m_component[r];
+      ComponentType *ct = c->GetComponentType();
+
+      // Check if we have the number of components required before removal.
+      if (ct->GetRequiredComponents() != ct->GetMaximumComponents() &&
+         NumberOfComponentsOfType(ct) > ct->GetRequiredComponents()) {
+         RemoveComponent(r);
+         return;
+      }
+   }
 }
 
 /**
@@ -49,6 +131,8 @@ void EvolutionaryProgram::Cleanup(void) {
  */
 void EvolutionaryProgram::MutateStructure(void) {
    int r = rand() % 7;
+
+   //std::cout << "mutate structure "<< r << "\n";
 
    switch (r) {
    case 0:  // Add random component.
@@ -146,7 +230,7 @@ void EvolutionaryProgram::MutateParameters(void) {
    int t,p;
 
    for (t=0; t<m_component_count; t++) {
-      p = m_component[t]->GetComponentType()->m_number_of_parameters;
+      p = m_component[t]->GetComponentType()->GetNumberOfParameters();
       if (p > 0) {
          m_component[t]->RandomizeParameter(rand() % p);
       }
@@ -198,6 +282,7 @@ void EvolutionaryProgram::RemoveComponentOnInputsRecursively(Component *t_compon
 
 /**
  * Take parts of both parents and combine.
+ * First copy from parent 1, then match one component and copy that one down from parent 2.
  */
 void EvolutionaryProgram::Crossover(EvolutionaryProgram *t_parent1, EvolutionaryProgram *t_parent2){
    int t,r;
@@ -223,7 +308,9 @@ void EvolutionaryProgram::Crossover(EvolutionaryProgram *t_parent1, Evolutionary
       c = t_parent2->GetRandomComponentOfType(m_component[r]->GetComponentType());
       if (c) {
          // Remove inputs of my component recursively but not this component (t_remove = false)
-         RemoveComponentOnInputsRecursively(m_component[r],false);
+         //RemoveComponentOnInputsRecursively(m_component[r],false);
+
+         std::cout << "EvolutionaryProgram::Crossover() on type: " << c->GetComponentType()->GetName() << " " << r << ", " << t_parent2->GetComponentIndex(c) << "\n";
 
          // Append inputs of parent 2's components recursively.
          CopyComponentOnInputsRecursively(t_parent2, r, t_parent2->GetComponentIndex(c));
@@ -235,10 +322,12 @@ void EvolutionaryProgram::Crossover(EvolutionaryProgram *t_parent1, Evolutionary
    }
 
    if (!m_component_count) {
-      std::cout << "EvolutionaryProgram::Crossover() -> Error: child has no components.\n";
+      std::cout << "EvolutionaryProgram::Crossover() -> Error: child has no components, parent components: " << t_parent1->GetComponentCount() << " and " << t_parent2->GetComponentCount() << ".\n";
       exit(0);
    }
 
+   // Make sure the required components are there since they may be removed in the crossover.
+   CorrectComponentTypeAmounts();
 }
 
 /**
@@ -255,17 +344,27 @@ void EvolutionaryProgram::Execute(void) {
 void EvolutionaryProgram::Randomize(void) {
    Reset();
    AddRandomComponents(5);
-   AddRandomConnections();
+   ShuffleAndReconnect();
+   //AddRandomConnections();
    //OrderComponentsOnDependency();
 }
 
-void EvolutionaryProgram::AddRequiredComponents(void) {
+/**
+ * Make sure the required components are there and the maximum is not exceded.
+ */
+void EvolutionaryProgram::CorrectComponentTypeAmounts(void) {
    int t,t2;
+   ComponentType *type;
 
    for (t=0; t<m_component_library->GetNumberOfComponentTypes(); t++) {
-      if (m_component_library->GetComponentType(t)->m_req_number_of_components > 0) {
-         for (t2=0; t2 < m_component_library->GetComponentType(t)->m_req_number_of_components; t2++) {
-            AddComponent(m_component_library->GetComponentType(t));
+      type = m_component_library->GetComponentType(t);
+      if (type->GetRequiredComponents() > 0) {
+         // Add the ones that where not there.
+         for (t2 = NumberOfComponentsOfType(type); t2 < type->GetRequiredComponents(); t2++) {
+            AddComponent(type);
+         }
+         for (;t2 > type->GetMaximumComponents(); t2--) {
+            RemoveComponentOfType(type);
          }
       }
    }
@@ -291,7 +390,7 @@ int EvolutionaryProgram::NumberOfComponentsOfType(ComponentType *t_type) {
  * Returns true if the maximum number of components of given type is met.
  */
 bool EvolutionaryProgram::MaxNumberOfComponentsMet(ComponentType *t_type) {
-   if (NumberOfComponentsOfType(t_type) >= t_type->m_max_number_of_components)
+   if (NumberOfComponentsOfType(t_type) >= t_type->GetMaximumComponents())
       return true;
    return false;
 }
@@ -308,7 +407,7 @@ Component *EvolutionaryProgram::AddRandomComponent(void) {
    // 40 attempts to find a component.
    for (t = 0; t < 40; t++) {
       ComponentType *ct =  m_component_library->GetComponentType(rand() % m_component_library->GetNumberOfComponentTypes());
-      if (ct->m_req_number_of_components != ct->m_max_number_of_components &&
+      if (ct->GetRequiredComponents() != ct->GetMaximumComponents() &&
             !MaxNumberOfComponentsMet(ct)) {
          return AddComponent(ct);
       }
@@ -324,7 +423,7 @@ Component *EvolutionaryProgram::CreateComponent(void) {
    m_component[m_component_count] = m_component_manager->CreateComponent();
    if (!m_component[m_component_count]) {
       std::cout << "EvolutionaryProgram::CreateComponent() -> Error: No component available.\n";
-      return 0;
+      exit(1);
    }
    m_component_count ++;
    return m_component[m_component_count-1];
@@ -357,7 +456,7 @@ void EvolutionaryProgram::AddRandomConnections(Component *t_component) {
    int t,t2;
 
    // Connect its inputs.
-   for (t=0; t<type->m_number_of_inputs; t++) {
+   for (t=0; t<type->GetNumberOfInputs(); t++) {
       in = t_component->GetInputNode(t);
       for (t2=0; t2<10; t2++) {
          on = GetOutputNode(rand() % outputs);
@@ -369,7 +468,7 @@ void EvolutionaryProgram::AddRandomConnections(Component *t_component) {
    }
 
    // Connect its outputs.
-   for (t=0; t<type->m_number_of_outputs; t++) {
+   for (t=0; t<type->GetNumberOfInputs(); t++) {
       on = t_component->GetOutputNode(t);
       for (t2=0; t2<10; t2++) {
          in = GetInputNode(rand() % inputs);
@@ -422,69 +521,6 @@ void EvolutionaryProgram::AddRandomConnection(void) {
    }
 }
 
-/**
- * Remove component.
- */
-void EvolutionaryProgram::RemoveComponent(int t_index) {
-   Component *c = m_component[t_index];
-   int r;
-
-   if (m_component_count > 1) {
-      // Disconnect from all inputs.
-      for (r = 0; r < m_component_count; r++) {
-         m_component[r]->DisconnectFrom(c);
-      }
-
-      c->Disconnect();
-
-      // Remove component but keep the order of components.
-      for (r = t_index; r < m_component_count - 1; r++) {
-         m_component[r] = m_component[r + 1];
-      }
-   }
-
-   m_component_manager->DestroyComponent(c);
-
-   m_component_count--;
-}
-
-/**
- * Remove component.
- */
-void EvolutionaryProgram::RemoveComponent(Component *t_component){
-   int t;
-
-   for (t = 0; t < m_component_count; t++) {
-      if (t_component == m_component[t]) {
-         RemoveComponent(t);
-         return;
-      }
-   }
-}
-
-/**
- * Try to remove random component 10 times.
- */
-void EvolutionaryProgram::RemoveRandomComponent(void) {
-   if (m_component_count < 2)
-      return;
-
-   int t, r;
-
-   for (t = 0; t < 10; t++) {
-      r = rand() % m_component_count;
-
-      Component *c = m_component[r];
-      ComponentType *ct = c->GetComponentType();
-
-      // Check if we have the number of components required before removal.
-      if (ct->m_req_number_of_components != ct->m_max_number_of_components &&
-         NumberOfComponentsOfType(ct) > ct->m_req_number_of_components) {
-         RemoveComponent(t);
-         return;
-      }
-   }
-}
 
 /**
  * If exists return the first component of type t_component_type. Otherwise return 0.
@@ -655,9 +691,7 @@ void EvolutionaryProgram::CopyFrom(EvolutionaryProgram *t_evolutionary_program) 
    }
 
    // Clean up existing data.
-   for (t = 0; t < m_component_count; t++) {
-      m_component_manager->DestroyComponent(m_component[t]);
-   }
+   Cleanup();
 
    m_component_count = t_evolutionary_program->m_component_count;
 
@@ -676,7 +710,7 @@ void EvolutionaryProgram::CopyFrom(EvolutionaryProgram *t_evolutionary_program) 
    for (t = 0; t < m_component_count; t++) {
       corg = t_evolutionary_program->m_component[t];
       ct = corg->GetComponentType();
-      for (t2=0; t2 < ct->m_number_of_inputs; t2++) {
+      for (t2=0; t2 < ct->GetNumberOfInputs(); t2++) {
          on = corg->GetInputNode(t2)->GetConnectedTo();
          if (on) {
             // get index of component.
@@ -698,29 +732,41 @@ void EvolutionaryProgram::CopyFrom(EvolutionaryProgram *t_evolutionary_program) 
  * Copies all input on a given component recursively from another program.
  * t_index is index of the destination component in this EvolutionaryProgram.
  * t_ep_index is the index of the source component in the other EvolutionaryProgram.
+ * So the components on both indexes should be of the same type.
  * The best thing i come up with is copying all after t_ep_index and then remove unconnected components.
  *
  * TODO: does not check on maximum allowed components of one type.
  */
 void EvolutionaryProgram::CopyComponentOnInputsRecursively(EvolutionaryProgram *t_ep, int t_index, int t_ep_index) {
-   int t,t2,source_index,my_index;
+   int t,t2,on_source_index,on_my_index,source_component_index,my_component_index;
    Component *nc;
    Component *corg;
    ComponentType *ct;
    ComponentOutputNode *on;
    EvolutionaryProgram *_this = this;
 
+   //std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> start: my index " << t_index << " other index: " << t_ep_index << "\n";
+
+   // this must exist.
    if (!_this) {
       std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> Error: no this.\n";
       exit(1);
    }
+   // If parent must exist.
    if (!t_ep) {
-      std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> Error: no orig.\n";
+      std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> Error: no parent.\n";
       exit(1);
    }
-   if (!t_ep->m_component[t_ep_index]) {
-      std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> Error: component does not exist in orig.\n";
+   // Check if both components are of the same type.
+   if (t_ep->m_component[t_ep_index]->GetComponentType() != m_component[t_index]->GetComponentType()){
+      std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> Components are of different types.\n";
       exit(1);
+   }
+
+   // Remove existing components after t_index.
+   while (m_component_count > t_index+1) {
+      std::cout << "removing component: " << (m_component_count-1) << "\n";
+      RemoveComponent(m_component_count-1);
    }
 
    // Create a copy of the components.
@@ -729,44 +775,53 @@ void EvolutionaryProgram::CopyComponentOnInputsRecursively(EvolutionaryProgram *
       if (c) {
          nc = CreateComponent();
          nc->CopyFrom(c);
+
+         on_my_index = m_component_count - 1;
+
+         std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> my index / other index: " << on_my_index << " / " << t << "\n";
+         //std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> ctypes: " << m_component[on_my_index]->GetComponentType()->GetName() << " / " << t_ep->m_component[t]->GetComponentType()->GetName() << "\n";
+
+      } else {
+         std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> Error: no component received.\n";
+         exit(1);
       }
    }
 
    // Connect the components in the same way.
-   for (t = t_ep_index; t < t_ep->m_component_count; t++) {
-      corg = t_ep->m_component[t];
+   for (source_component_index = t_ep_index; source_component_index < t_ep->m_component_count; source_component_index++) {
+      corg = t_ep->m_component[source_component_index];
       ct = corg->GetComponentType();
-      for (t2=0; t2 < ct->m_number_of_inputs; t2++) {
+      my_component_index = m_component_count - (t_ep->m_component_count - source_component_index);
+      for (t2=0; t2 < ct->GetNumberOfInputs(); t2++) {
          on = corg->GetInputNode(t2)->GetConnectedTo();
+
          if (on) {
-            // get index of component in source program.
-            source_index = t_ep->GetComponentIndex(on->GetComponent());
-            if (source_index > t_ep_index) {
+            // get index of output node component in source program.
+            on_source_index = t_ep->GetComponentIndex(on->GetComponent());
+
+            //std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> output node " << on->GetOutputIndex() << " of component " << t_ep->m_component[on_source_index]->GetComponentType()->GetName() << " connected to input node " << t2 << " of component " << corg->GetComponentType()->GetName() << "\n";
+
+            if (on_source_index >= t_ep_index) {
                // Get same component in this program.
-               if (source_index == t_ep_index)
-                  my_index = t_index;
-               else
-                  my_index = m_component_count - (t_ep->m_component_count - source_index);
+               on_my_index = m_component_count - (t_ep->m_component_count - on_source_index);
+
+               //std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> types should be the same: " << m_component[my_component_index]->GetComponentType()->GetName() << " / " << t_ep->m_component[source_component_index]->GetComponentType()->GetName() << "\n";
+               //std::cout << "EvolutionaryProgram::CopyComponentOnInputsRecursively() -> types should be the same: " << m_component[on_my_index]->GetComponentType()->GetName() << " / " << t_ep->m_component[on_source_index]->GetComponentType()->GetName() << "\n";
+
 
                // Get same node in this program.
-               on = m_component[my_index]->GetOutputNode(on->GetOutputIndex());
-
-               m_component[t]->GetInputNode(t2)->ConnectTo(on);
+               on = m_component[on_my_index]->GetOutputNode(on->GetOutputIndex());
+               m_component[my_component_index]->GetInputNode(t2)->ConnectTo(on);
             }
          } else {
-            // else its not connected.
-            m_component[t]->GetInputNode(t2)->Disconnect();
+            // Just make sure its not connected.
+            m_component[my_component_index]->GetInputNode(t2)->Disconnect();
          }
       }
    }
 
-   // Remove unconnected components after first_new_component.
-   for (t = t_index; t < m_component_count; t++) {
-      if (!m_component[t]->NumberOfInputsConnected()) {
-         RemoveComponent(t);
-         t--;
-      }
-   }
+   // Correct if too many or too few components of some type.
+   CorrectComponentTypeAmounts();
 }
 
 
@@ -786,8 +841,8 @@ void EvolutionaryProgram::Debug(void) {
 
    for (t=0; t<m_component_count; t++) {
       type = m_component[t]->GetComponentType();
-      std::cout << "EvolutionaryProgram::Debug() -> component[" << t << "] of type '"<< type->m_name << "': " << type->m_number_of_inputs << " input nodes\n";
-      for (t2 = 0; t2 < type->m_number_of_inputs; t2++) {
+      std::cout << "EvolutionaryProgram::Debug() -> component[" << t << "] of type '"<< type->GetName() << "': " << type->GetNumberOfInputs() << " input nodes\n";
+      for (t2 = 0; t2 < type->GetNumberOfInputs(); t2++) {
          in = m_component[t]->GetInputNode(t2);
          if (!in->IsConnected()) std::cout << t <<"[" << t2 << "] <- nc\n";
          else {
@@ -820,9 +875,9 @@ std::string EvolutionaryProgram::ToJson(void) {
       if (t>0) j += ",";
       type = m_component[t]->GetComponentType();
       j += "{\"id\":\"" + std::to_string(t) + "\",";
-      j += "\"group\":\"" + std::string(type->m_name) + "\",";
+      j += "\"group\":\"" + std::string(type->GetName()) + "\",";
       j += "\"parameters\":[";
-      for (t2=0; t2<type->m_number_of_parameters; t2++) {
+      for (t2=0; t2<type->GetNumberOfParameters(); t2++) {
          if (t2>0) j += ",";
          j += std::to_string(m_component[t]->GetParameterValue(t2));
       }
@@ -833,7 +888,7 @@ std::string EvolutionaryProgram::ToJson(void) {
 
    for (t=m_component_count-1; t >= 0; t--) {
       type = m_component[t]->GetComponentType();
-      for (t2=0; t2 < type->m_number_of_inputs; t2++) {
+      for (t2=0; t2 < type->GetNumberOfInputs(); t2++) {
          in = m_component[t]->GetInputNode(t2);
          if (in->IsConnected()) {
             on = in->GetConnectedTo();
@@ -860,3 +915,11 @@ void EvolutionaryProgram::FromJson(std::string json) {
 }
 
 
+void EvolutionaryProgram::ResetComponentsForNextSimulation(void) {
+   int t;
+   ComponentType *type;
+   for (t=0; t<m_component_count; t++) {
+      type = m_component[t]->GetComponentType();
+      type->ResetForNextSimulation(m_component[t]);
+   }
+}

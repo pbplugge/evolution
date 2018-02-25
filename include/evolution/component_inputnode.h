@@ -36,6 +36,7 @@ namespace evolution {
       void SetType(int t);
       double GetValue(void);
       void Disconnect(void);
+      void DisconnectFrom(Component *t_component);
 
    private:
       Component *m_component;

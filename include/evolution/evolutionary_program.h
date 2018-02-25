@@ -51,6 +51,7 @@ namespace evolution {
       void FlipTwoRandomComponents(void);
       void DisconnectRandomNodes(void);
       Component *AddRandomComponent(void);
+      void ResetComponentsForNextSimulation(void);
 
    private:
       ComponentManager *m_component_manager;
@@ -61,7 +62,7 @@ namespace evolution {
       void Reset(void);
 
       // Components.
-      void AddRequiredComponents(void);
+      void CorrectComponentTypeAmounts(void);
       void AddRandomComponents(int t_number_of_components);
       Component *AddComponent(ComponentType *t_component_type);
       Component *CreateComponent(void);
@@ -72,6 +73,7 @@ namespace evolution {
       bool MaxNumberOfComponentsMet(ComponentType *t_type);
       int NumberOfComponentsOfType(ComponentType *t_type);
       void RemoveComponent(int t_index);
+      void RemoveComponentOfType(ComponentType *t_type);
       void RemoveComponent(Component *t_component);
       void DisconnectAll(void);
       int GetInputNodeCount(void);

@@ -42,6 +42,7 @@ namespace evolution {
       double GetIndividualTriangularNumber(int t_index);
       void CreateIndividualFromCrossOver(int t_index);
       void CheckForErrors(void);
+      HallOfFame *GetHallOfFame(void);
 
       Statistics *GetStatsAvgFitness(void);
       Statistics *GetStatsMaxFitness(void);

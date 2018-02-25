@@ -11,10 +11,14 @@ Component::Component(){
       m_input_node[t].SetInputIndex(t);
    }
    m_component_type = 0;
+   m_data = 0;
 }
 
 void Component::Clear(void){
-   m_component_type = 0;
+   if (m_component_type) {
+      m_component_type->ClearComponent(this);
+      m_component_type = 0;
+   }
 }
 
 /**
@@ -37,7 +41,13 @@ void Component::SetOutputValue(int node, double v) {
 }
 
 void Component::Init(ComponentType *t_component_type) {
+   if (!t_component_type) {
+      std::cout << "Component::Init() -> No component type provided\n";
+      exit(1);
+   }
    m_component_type = t_component_type;
+
+   m_component_type->InitComponent(this);
 
    RandomizeParameters();
 }
@@ -60,7 +70,7 @@ void Component::RandomizeParameter(int t_parameter) {
 }
 
 void Component::RandomizeParameters(void){
-   for (int t=0; t<m_component_type->m_number_of_parameters; t++) {
+   for (int t=0; t<m_component_type->GetNumberOfParameters(); t++) {
       RandomizeParameter(t);
    }
 }
@@ -69,14 +79,8 @@ void Component::RandomizeParameters(void){
  * Disconnect all nodes that are connected to this component.
  */
 void Component::DisconnectFrom(Component *t_component) {
-   int t,t2;
-
-   for (t=0; t<t_component->GetOutputNodeCount(); t++) {
-      for (t2=0; t2<GetInputNodeCount(); t2++){
-         if (m_input_node[t2].GetConnectedTo() == t_component->GetOutputNode(t)) {
-            m_input_node[t2].Disconnect();
-         }
-      }
+   for (int t=0; t<GetInputNodeCount(); t++) {
+      m_input_node[t].DisconnectFrom(t_component);
    }
 }
 
@@ -84,25 +88,22 @@ void Component::DisconnectFrom(Component *t_component) {
  * Getter for input node count.
  */
 int Component::GetInputNodeCount(void) {
-   return m_component_type->m_number_of_inputs;
+   return m_component_type->GetNumberOfInputs();
 }
 
 /**
  * Getter for output node count.
  */
 int Component::GetOutputNodeCount(void) {
-   return m_component_type->m_number_of_outputs;
+   return m_component_type->GetNumberOfOutputs();
 }
 
 
 ComponentInputNode *Component::GetInputNode(int t_id) {
    if (t_id >= GetInputNodeCount()){
-      //std::cout << "Component::GetInputNode() -> input_node[" << id << "] is not used by component of type " << this->component_type->name << "\n";
+      std::cout << "Component::GetInputNode() -> ERROR: m_input_node[" << t_id << "] is not used by component of type " << m_component_type->GetName() << ", max: " << m_component_type->GetNumberOfInputs() << " \n";
       exit(1);
    }
-   //std::cout << id << "  "  <<  input_node_count << "\n";
-   //std::cout << "Component::GetInputNode() -> " << input_node[id].GetName() << "\n";
-
    return &m_input_node[t_id];
 }
 
@@ -111,7 +112,7 @@ ComponentInputNode *Component::GetInputNode(int t_id) {
  */
 ComponentOutputNode *Component::GetOutputNode(int t_id) {
    if (t_id >= GetOutputNodeCount()){
-      //std::cout << "Component::GetInputNode() -> input_node[" << output << "] is not used by component of type " << this->component_type->name << "\n";
+      std::cout << "Component::GetInputNode() -> ERROR: m_output_node[" << t_id << "] is not used by component of type " << m_component_type->GetName() << ", max: " << m_component_type->GetNumberOfOutputs() << " \n";
       exit(1);
    }
    return &m_output_node[t_id];
@@ -124,20 +125,24 @@ void Component::CopyFrom(Component *t_component) {
    int t;
 
    m_component_type = t_component->m_component_type;
+   Disconnect();
 
    // Copy parameters.
-   for (t = 0; t < m_component_type->m_number_of_parameters; t++) {
+   for (t = 0; t < m_component_type->GetNumberOfParameters(); t++) {
       m_parameter[t] = t_component->m_parameter[t];
    }
+
+   // Create custom data if there is some.
+   m_component_type->InitComponent(this);
 }
 
 int Component::GetNumberOfConnectedInputs(void) {
    int c = 0;
 
-   if (!m_component_type->m_number_of_inputs)
+   if (!m_component_type->GetNumberOfInputs())
       return 0;
 
-   for (int t=0; t<m_component_type->m_number_of_inputs; t++) {
+   for (int t=0; t<m_component_type->GetNumberOfInputs(); t++) {
       if (m_input_node[t].IsConnected()) {
          c++;
       }
@@ -146,7 +151,7 @@ int Component::GetNumberOfConnectedInputs(void) {
 }
 
 void Component::Disconnect(void) {
-   for (int t=0; t<m_component_type->m_number_of_inputs; t++) {
+   for (int t=0; t<m_component_type->GetNumberOfInputs(); t++) {
       m_input_node[t].Disconnect();
    }
 }
@@ -156,7 +161,7 @@ void Component::Disconnect(void) {
  */
 bool Component::InputIsConnectedTo(Component *t_component) {
    ComponentOutputNode *n;
-   for (int t=0; t<m_component_type->m_number_of_inputs; t++) {
+   for (int t=0; t<m_component_type->GetNumberOfInputs(); t++) {
       n = m_input_node[t].GetConnectedTo();
       if (n) {
          if (n->GetComponent() == t_component)
@@ -172,9 +177,17 @@ bool Component::InputIsConnectedTo(Component *t_component) {
 int Component::NumberOfInputsConnected(void) {
    int c = 0;
 
-   for (int t=0; t<m_component_type->m_number_of_inputs; t++) {
+   for (int t=0; t<m_component_type->GetNumberOfInputs(); t++) {
       if (m_input_node[t].IsConnected())
          c++;
    }
    return c;
+}
+
+void Component::SetCustomData(void *t_data) {
+   m_data = t_data;
+}
+
+void *Component::GetCustomData(void) {
+   return m_data;
 }
